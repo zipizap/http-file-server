@@ -30,7 +30,11 @@ http-file-server --listen-port 9000 --dir-to-serve /path/to/directory
 
 See `docker_build.sh` and `docker_run.sh`
 
-Be mindful that the host-directory `/path/to/share` (which will be mounted as `/DirToServe` in the container) should have appropriate permissions for the container-user to read/write files into it. In last resort use `chmod a+rwX /path/to/share`. In any case, such situations are identifiable in the logs by their errors messages.
+The container runs with uid:gid 1000:1000  (see Dockerfile)
+
+Be mindful that the host-directory `/path/to/share` (which will be mounted as `/DirToServe` in the container) should have appropriate permissions for the container user (uid:gid) to read/write files into it.   
+In last resort use `chmod a+rwX /path/to/share`.   
+In any case, such conflicts would produce errors in the logs, with hints about the symptoms.   
 
 
 ```bash
