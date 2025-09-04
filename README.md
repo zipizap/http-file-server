@@ -1,22 +1,14 @@
 # HTTP File Server
 
-Very very simple and lightweight HTTP file server for sharing files over a network.
+Very very simple and lightweight HTTP file server for uploading/downloading/deleting files in a directory.
 
 ## Overview
 
-This HTTP File Server provides an easy way to share files and directories over HTTP. It creates a temporary web server that allows downloading/uploading/deleting files from the specified directory.
-
-## Features
-
-- Simple command-line interface
-- Directory listing
-- File downloads & uploads
-- Cross-platform compatibility
-- Helper scripts to build/run docker container
+This HTTP File Server provides an easy way to share files and directories over HTTP. It creates a temporary web server that allows downloading/uploading/deleting files from a directory. Its meant as a basic files upload/download webpage ;)
 
 ## Usage
 
-### Running Locally
+### Running from binary 
 
 ```bash
 # Basic usage - serves current directory on port 8080
@@ -32,20 +24,26 @@ http-file-server --dir-to-serve /path/to/directory
 http-file-server --listen-port 9000 --dir-to-serve /path/to/directory
 ```
 
-### Using Docker
+### Running from docker container
 
-#### Run the container
+#### Building and running the Docker Image
+
+See `docker_build.sh` and `docker_run.sh`
+
+Be mindful that the host-directory `/path/to/share` (which will be mounted as `/DirToServe` in the container) should have appropriate permissions for the container-user to read/write files into it. In last resort use `chmod a+rwX /path/to/share`. In any case, such situations are identifiable in the logs by their errors messages.
+
 
 ```bash
-# Serve the current directory
-docker run -p 8080:8080 -v $(pwd):/DirToServe http-file-server
-
 # Serve a specific directory
 docker run -p 8080:8080 -v /path/to/share:/DirToServe http-file-server
+
+# Serve the current directory
+docker run -p 8080:8080 -v $(pwd):/DirToServe http-file-server
 
 # Use a custom port
 docker run -p 9000:8080 -v $(pwd):/DirToServe http-file-server
 ```
+
 
 ## Building from Source
 
@@ -61,9 +59,32 @@ cd http-file-server
 ./http-file-server
 ```
 
-## Building and running the Docker Image
+## Running behind nginx reverse proxy
 
-See `docker_build.sh` and `docker_run.sh`
+To run the HTTP file server behind an nginx reverse proxy, you can use the following configuration as an example.
+
+The out-of-ordinary parameters are the `proxy_read_timeout` and `client_max_body_size` which are important for file uploads to work correctly.
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name myfiles.example.com;
+
+    ssl_certificate /etc/nginx/certs/myfiles.example.com-cert.pem;
+    ssl_certificate_key /etc/nginx/certs/myfiles.example.com-key.pem;
+
+    location / {
+        proxy_pass http://webserved:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # These 2 options bellow are important for file uploads to work correctly
+        proxy_read_timeout 310s;
+        client_max_body_size 0;
+    }
+}
+```
 
 ## License
 
