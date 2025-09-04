@@ -92,4 +92,4 @@ server {
 
 ## License
 
-[MIT License](LICENSE)
+[Affero AGPL](LICENSE)
