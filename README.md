@@ -6,6 +6,8 @@ Very very simple and lightweight HTTP file server for uploading/downloading/dele
 
 This HTTP File Server provides an easy way to share files and directories over HTTP. It creates a temporary web server that allows downloading/uploading/deleting files from a directory. Its meant as a basic files upload/download webpage ;)
 
+![Demo](images/demo.png)
+
 ## Usage
 
 ### Running from binary 
